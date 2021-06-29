@@ -1,18 +1,7 @@
 # M42PL - Key/value stores
 
-Core [M42PL] key/value stores.
-
-## What are M42PL dispatchers ?
-
-M42PL KVStore read and write key/value pairs from a KVStore (e.g. Redis).
-As other M42PL components, multiples KVStore backend are supported.
-
-## Dispatchers list
-
-| Aliases | Class   | Module      | Description                   | Status |
-|---------|---------|-------------|-------------------------------|--------|
-| `local` | `Local` | `local.py`  | Use a local `dict` as backend | Alpha  |
-| `redis` | `Redis` | `_redis.py` | Use Redis as backend          | Alpha  |
+M42PL KVStores read and write key/value pairs from a KVStore (e.g. Redis).
+As other M42PL components, multiples KVStore backends are supported.
 
 ## Installation
 
@@ -20,6 +9,13 @@ As other M42PL components, multiples KVStore backend are supported.
 git clone https://github.com/jpclipffel/m42pl-kvstores
 pip install -e m42pl-kvstores
 ```
+
+## KVStores list
+
+| Aliases | Module      | Description                   |
+|---------|-------------|-------------------------------|
+| `local` | `local.py`  | Use a local `dict` as backend |
+| `redis` | `_redis.py` | Use Redis as backend          |
 
 ## Usage
 
