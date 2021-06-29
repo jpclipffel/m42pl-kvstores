@@ -7,7 +7,7 @@ from m42pl.kvstores import KVStore
 
 
 class Redis(KVStore):
-    """A Redis-backed KVStore implementation.
+    """A Redis-based KVStore implementation.
     """
 
     _aliases_ = ['redis',]
@@ -49,3 +49,6 @@ class Redis(KVStore):
             self.make_key(key),
             msgpack.packb(value or '')
         )
+
+    async def remove(self, key: str) -> None:
+        await self.redis.delete(self.make_key(key))
