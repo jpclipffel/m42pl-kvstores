@@ -5,14 +5,14 @@ import shelve
 
 from m42pl.kvstores import KVStore
 
-from typing import Any
+from typing import Any, AsyncGenerator
 
 
 class LocalKVStore(KVStore):
-    """A simplisitc and temporary KVStore implementation.
-    
-    This KVSotre exists only during a pipeline execution and does not
-    preserve its state once destroyed.
+    """A KVStore interface over Python's ``shelve`` module.
+
+    This KVStore does not support concurrent access (only one process
+    can read and/or write the KVStore at a time).
     """
 
     _aliases_ = ['local', 'shelve']
@@ -34,7 +34,7 @@ class LocalKVStore(KVStore):
         except Exception:
             try:
                 self.logger.info('attempting to open shelve in read-only mode')
-                self.shelve = self.shelve(self.path, flag='r')
+                self.shelve = shelve.open(self.path, flag='r')
             except Exception:
                 raise
         self.logger.info(f'shelve opened')
@@ -58,9 +58,17 @@ class LocalKVStore(KVStore):
     async def write(self, key: str, value: Any = None) -> None:
         self.shelve[key] = value
 
-    async def remove(self, key: str = None, default: Any = None) -> Any:
+    async def delete(self, key: str = None, default: Any = None) -> Any:
         try:
             del self.shelve[key]
         except Exception:
             pass
         return default
+
+    async def items(self, key: str|None = None) -> AsyncGenerator:
+        for k, v in self.shelve.items():
+            try:
+                if key is None or str(k).startswith(key):
+                    yield k, v
+            except Exception:
+                pass

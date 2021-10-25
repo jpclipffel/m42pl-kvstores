@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import aioredis
 import msgpack
 
@@ -13,7 +15,7 @@ class Redis(KVStore):
     _aliases_ = ['redis',]
 
     def __init__(self, url: str = 'redis://127.0.0.1:6379',
-                    prefix: str = 'm42pl.', *args, **kwargs):
+                    prefix: str = 'm42pl', *args, **kwargs):
         """
         :param url:     Redis URL
         :param prefix:  Redis keys prefix; Default to 'm42pl.'
@@ -25,7 +27,7 @@ class Redis(KVStore):
         self.redis = None
 
     def make_key(self, key: str):
-        return f'{self.prefix}{key}'
+        return f'{self.prefix}.{key}'
 
     async def __aenter__(self):
         self.redis = await aioredis.create_redis_pool(self.url)
@@ -50,5 +52,31 @@ class Redis(KVStore):
             msgpack.packb(value or '')
         )
 
-    async def remove(self, key: str) -> None:
+    async def delete(self, key: str) -> None:
         await self.redis.delete(self.make_key(key))
+
+    async def items(self, key: str|None):
+        for k in await self.redis.keys(f'{self.make_key(key)}*'):
+        # for k in await self.redis.keys('*'):
+            # print(f'got key: {k}')
+            try:
+                # Cast the key to a string
+                try:
+                    k = k.decode('utf8')
+                    # print(f'cast key: {k}')
+                except Exception:
+                    raise
+                # Read key value
+                v = await self.redis.get(k)
+                # print(f'read key {k}: {v}')
+                if v is not None:
+                    try:
+                        v = msgpack.unpackb(v)
+                        # print(f'unpack key {v}: {v}')
+                    except Exception:
+                        pass
+                # Yield key and value
+                yield (k.lstrip(f'{self.prefix}.'), v)
+            except Exception:
+                raise
+                pass
