@@ -8,8 +8,6 @@ setup(
   version='1.0.0',
   packages=['m42pl_kvstores',],
   install_requires=[
-    'm42pl',
-    # ---
     'aioredis==1.3.1',
   ]
 )
